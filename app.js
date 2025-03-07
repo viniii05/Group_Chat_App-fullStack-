@@ -19,7 +19,9 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(UserRoutes);
-
+app.get('/' , (req,res) => {
+  res.sendFile(path.join(__dirname,'views','chat.html'));
+})
 sequelize.sync()
   .then(() => {
     app.listen(process.env.PORT || 3000, () => console.log('Server running on port 3000'));
