@@ -8,24 +8,20 @@
 </head>
 <body>
     <div class="container">
-        <form id="signupForm">
-            <h2>Sign-up</h2>
-            <input type="text" id="name" placeholder="Name" required><br>
-
+        <form id="loginForm">
+            <h2>Login</h2>
             <input type="email" id="email" placeholder="Email"><br>
-
-            <input type="number" id="phonenumber" placeholder="Mobile Number"><br>
 
             <input type="password" id="password" placeholder="Password"><br>
 
-            <button type="submit">Sign Up</button><br>
+            <button type="submit">Login</button><br>
 
-            <span>Already have an account? <a href="/user/login">Login</a></span>
+            <span>New to this website? <a href="/user/signup">Signup</a></span>
 
             <div id="error-message" style="color: red; margin-top: 10px;"></div>
         </form>
     </div>
 
-    <script src="/js/signup.js"></script>
+    <script src="/js/userCredentials.js"></script>
 </body>
 </html>

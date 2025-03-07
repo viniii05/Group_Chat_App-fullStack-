@@ -7,6 +7,10 @@ exports.getSignupForm = (req,res) => {
     res.sendFile(path.join(rootDir,'views','signup.html'));
 };
 
+exports.getLoginForm = (req,res) => {
+    res.sendFile(path.join(rootDir,'views','login.html'));
+}
+
 exports.postSignupData = async (req, res) => {
     try {
         const { name, email, phonenumber, password } = req.body;
