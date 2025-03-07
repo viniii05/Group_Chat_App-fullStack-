@@ -4,24 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat-signup</title>
-    <link rel="stylesheet" href="/public/css/signup.css">
+    <link rel="stylesheet" href="/css/signup.css">
 </head>
 <body>
-    <div>
-        <form action="">
+    <div class="container">
+        <form id="signupForm">
             <h2>Sign-up</h2>
-            <input type="text" placeholder="Name" required><br>
+            <input type="text" id="name" placeholder="Name" required><br>
 
-            <input type="email" placeholder="Email"><br>
+            <input type="email" id="email" placeholder="Email"><br>
 
-            <input type="number" placeholder="Mobile Number"><br>
+            <input type="number" id="phonenumber" placeholder="Mobile Number"><br>
 
-            <input type="password" placeholder="Password"><br>
+            <input type="password" id="password" placeholder="Password"><br>
 
-            <button>Sign Up</button><br>
+            <button type="submit">Sign Up</button><br>
 
             <span>Already have an account? <a href="/login">Login</a></span>
+
+            <div id="error-message" style="color: red; margin-top: 10px;"></div>
         </form>
     </div>
+
+    <script src="/js/signup.js"></script>
 </body>
 </html>
