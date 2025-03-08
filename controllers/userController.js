@@ -50,9 +50,13 @@ exports.postLoginData = async (req, res) => {
         }
 
         const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: "1h" });
+        console.log(token);
 
-        res.status(200).json({ message: "Login successful", token });
-    } catch (error) {
+        res.json({
+            message: "Login successful",
+            token,
+            redirect: "/chat.html" // Correct redirect URL
+        });    } catch (error) {
         console.error("Login error:", error);
         res.status(500).json({ error: "Internal server error" });
     }

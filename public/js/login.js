@@ -14,7 +14,16 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const data = await response.json();
 
         if (response.ok) {
-            window.location.href = data.redirect; // Redirect user to "/"
+            localStorage.setItem("token", data.token);
+            console.log("Login successful!");
+            alert('Logged in!!');
+
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            } else {
+                console.error("Redirect URL missing in response");
+                document.getElementById('error-message').innerText = "Redirect URL missing";
+            }
         } else {
             document.getElementById('error-message').innerText = data.error || 'Something went wrong';
         }
