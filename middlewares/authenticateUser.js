@@ -17,7 +17,7 @@ exports.authenticateUser = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Attach user data
+        req.user = decoded;
         next();
     } catch (err) {
         console.error("JWT Verification Error:", err.message);

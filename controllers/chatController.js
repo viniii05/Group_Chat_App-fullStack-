@@ -4,7 +4,7 @@ const User = require('../models/UserData');
 exports.saveMessage = async (req, res) => {
   try {
     const { message } = req.body;
-    const userId = req.user.id; // Make sure req.user is correctly set in middleware
+    const userId = req.user.id;
 
     if (!message) {
       return res.status(400).json({ error: "Message cannot be empty" });
@@ -19,15 +19,20 @@ exports.saveMessage = async (req, res) => {
 };
 
 exports.getMessages = async (req, res) => {
-  try {
-    const messages = await ChatMessage.findAll({
-      include: { model: User, attributes: ["name"] },
-      order: [["createdAt", "ASC"]],
-    });
-
-    res.json(messages);
-  } catch (error) {
-    console.error("Error fetching messages:", error);
-    res.status(500).json({ error: "Failed to fetch messages" });
-  }
-};
+    try {
+      const messages = await ChatMessage.findAll({
+        include: [{ model: User, as: "UserDatum", attributes: ["name"] }],
+        order: [["createdAt", "ASC"]],
+      });
+  
+      if (!messages) {
+        return res.status(404).json({ error: "No messages found" });
+      }
+  
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ error: "Failed to fetch messages" });
+    }
+  };
+  
