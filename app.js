@@ -9,6 +9,8 @@ const socketIo = require("socket.io");
 const sequelize = require('./config/database');
 const UserRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const GroupRoutes = require("./routes/groupRoutes");
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server); 
@@ -21,17 +23,26 @@ app.use(cors({
 
 app.use(express.static(path.join(__dirname,'public')));
 app.use(express.static(path.join(__dirname, "views")));
+
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
+  socket.on("joinGroup", (groupId) => {
+      socket.join(groupId);
+      console.log(`User joined group: ${groupId}`);
+  });
+
   socket.on("sendMessage", (data) => {
-      io.emit("message", data);
+      io.to(data.groupId).emit("receiveMessage", data);
   });
 
   socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
   });
 });
+
+app.use(express.json());
+
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -40,6 +51,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(GroupRoutes);
 app.use(chatRoutes);
 app.use(UserRoutes);
 

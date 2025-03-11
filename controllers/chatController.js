@@ -1,55 +1,73 @@
-const ChatMessage = require('../models/chatMessage');
-const User = require('../models/UserData');
+const { User, Group, GroupMember, ChatMessage } = require("../models");
 
 exports.saveMessage = async (req, res) => {
-    try {
-      const { message } = req.body;
-      const userId = req.user.id; // ✅ Ensure user ID is used
-  
-      if (!message) {
-        return res.status(400).json({ error: "Message cannot be empty" });
-      }
-  
-      const newMessage = await ChatMessage.create({ userId, message });
-  
-      // ✅ Fetch user's name to send correct data via WebSocket
-      const user = await User.findByPk(userId, { attributes: ["name"] });
-  
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-  
-      // ✅ Send message via WebSocket before responding
-      const io = req.app.get("io"); // ✅ Get io instance
-      if (io) {
-        io.emit("message", { user: user.name, text: message });
-      }
-  
-      // ✅ Respond to the client only once
-      res.status(201).json(newMessage);
-    } catch (error) {
-      console.error("Error saving message:", error);
-      res.status(500).json({ error: "Failed to save message" });
-    }
-  };
-  
-  
+  console.log("Request User:", req.user); // ✅ Debugging
 
-exports.getMessages = async (req, res) => {
-    try {
-      const messages = await ChatMessage.findAll({
-        include: [{ model: User, as: "UserDatum", attributes: ["name"] }],
-        order: [["createdAt", "ASC"]],
-      });
-  
-      if (!messages) {
-        return res.status(404).json({ error: "No messages found" });
-      }
-  
-      res.json(messages);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      res.status(500).json({ error: "Failed to fetch messages" });
+  try {
+    const { message, groupId } = req.body;
+    const userId = req.user.id; // ✅ Ensure user ID is used
+
+    if (!message || !groupId) {
+      return res.status(400).json({ error: "Message and Group ID are required" });
     }
-  };
-  
+
+    // ✅ Check if user is a member of the group
+    const isMember = await GroupMember.findOne({ where: { userId, groupId } });
+    if (!isMember) {
+      return res.status(403).json({ error: "You are not a member of this group" });
+    }
+
+    // ✅ Save the message with groupId
+    const newMessage = await ChatMessage.create({ userId, message, groupId });
+
+    // ✅ Fetch user's name to send correct data via WebSocket
+    const user = await User.findByPk(userId, { attributes: ["name"] });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // ✅ Emit message to the specific group
+    const io = req.app.get("io"); // Get io instance
+    if (io) {
+      io.to(`group_${groupId}`).emit("message", {
+        user: user.name,
+        text: message,
+        groupId,
+      });
+    }
+
+    // ✅ Respond to the client
+    res.status(201).json(newMessage);
+  } catch (error) {
+    console.error("Error saving message:", error);
+    res.status(500).json({ error: "Failed to save message" });
+  }
+};
+
+// ✅ Fetch messages for a specific group
+exports.getMessages = async (req, res) => {
+  try {
+    const { groupId } = req.params; // Expecting groupId in URL
+
+    if (!groupId) {
+      return res.status(400).json({ error: "Group ID is required" });
+    }
+
+    // ✅ Fetch messages for the group
+    const messages = await ChatMessage.findAll({
+      where: { groupId },
+      include: [{ model: User, as: "UserDatum", attributes: ["name"] }],
+      order: [["createdAt", "ASC"]],
+    });
+
+    if (messages.length === 0) {
+      return res.status(404).json({ error: "No messages found in this group" });
+    }
+
+    res.json(messages);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+};

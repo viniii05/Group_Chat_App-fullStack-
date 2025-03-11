@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/UserData');
-const path = require('path');
+const { User, Group, GroupMember, ChatMessage } = require("../models");
+
 const rootDir = require('../util/path');
 
 require('dotenv').config();

@@ -3,22 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat App</title>
+    <title>Group Chat</title>
     <link rel="stylesheet" href="/css/chat.css">
 </head>
 <body>
-    <div class="chat-container">
-        <h2>Chat App</h2>
-        <div id="users-list">
+    <div class="container">
+        <!-- Sidebar for Groups -->
+        <aside class="sidebar">
+            <h2>Groups</h2>
+            <ul id="group-list">
+                <!-- Groups will be dynamically added here -->
+            </ul>
+            <button id="createGroupBtn">+ Create Group</button>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-container">
+            <header class="chat-header">
+                <h2 id="groupTitle">Select a Group</h2>
+                <button id="inviteBtn" disabled>Invite</button>
+            </header>
+
+            <section id="chat-box">
+                <div id="messagesContainer">
+                    <!-- Chat messages will be displayed here -->
+                </div>
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Type a message..." disabled>
+                    <button id="sendBtn" disabled>Send</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Online Users -->
+        <aside class="users-list">
             <h3>Online Users</h3>
-            <ul id="users"></ul>
+            <ul id="users">
+                <!-- Users will be dynamically added here -->
+            </ul>
+        </aside>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div id="createGroupModal" class="modal">
+        <div class="modal-content">
+            <span class="close create-close">&times;</span>
+            <h2>Create New Group</h2>
+            <input type="text" id="groupNameInput" placeholder="Enter group name">
+            <button id="createGroupConfirmBtn">Create Group</button>
         </div>
-        <div id="chat-box">
-            <div id="messages"></div>
-            <div class="input-area">
-                <input type="text" id="messageInput" placeholder="Type a message...">
-                <button id="sendBtn">Send</button>
-            </div>
+    </div>
+
+    <!-- Invite Modal -->
+    <div id="inviteModal" class="modal">
+        <div class="modal-content">
+            <span class="close invite-close">&times;</span>
+            <h2>Invite User</h2>
+            <input type="text" id="inviteUserId" placeholder="Enter user ID or email">
+            <button id="sendInviteBtn">Send Invite</button>
         </div>
     </div>
 
