@@ -12,6 +12,13 @@ const Group = sequelize.define("Group", {
         allowNull: false,
         unique: true,
     },
+    createdBy: {
+        type: DataTypes.INTEGER,
+        allowNull: false, // Ensure it is NOT NULL
+    },
+},
+{
+    timestamps: true
 });
 
 Group.associate = (models) => {

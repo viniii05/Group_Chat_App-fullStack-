@@ -6,11 +6,11 @@ const router = express.Router();
 router.post('/signup', userController.postSignupData);
 router.post('/login', userController.postLoginData);
 
-router.get('/user/login', userController.getLoginForm);
-router.get('/user/signup', userController.getSignupForm);
+router.get('/login', userController.getLoginForm);
+router.get('/signup', userController.getSignupForm);
 
 
-const User = require("../models/UserData");
+const User = require("../models/User");
 const authenticateUser = require('../middlewares/authenticateUser');
 
 router.get("/user", authenticateUser.authenticateUser, async (req, res) => {

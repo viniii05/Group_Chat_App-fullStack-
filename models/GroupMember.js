@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const User = require("./UserData");
 const Group = require("./Group");
+const User = require('./User');
 
 const GroupMember = sequelize.define("GroupMember", {
     id: {
@@ -27,6 +27,11 @@ const GroupMember = sequelize.define("GroupMember", {
         },
         onDelete: "CASCADE",
     },
+    isAdmin: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
 });
 GroupMember.associate = (models) => {
     GroupMember.belongsTo(models.Group, { foreignKey: "groupId", onDelete: "CASCADE" });

@@ -51,7 +51,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(GroupRoutes);
+app.use('/groups',GroupRoutes);
 app.use(chatRoutes);
 app.use(UserRoutes);
 

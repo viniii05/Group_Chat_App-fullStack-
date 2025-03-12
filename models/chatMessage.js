@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const User = require("./UserData");
+const User = require("./User");
 const Group = require("./Group"); // Import Group model
 
 const ChatMessage = sequelize.define("ChatMessage", {
@@ -23,7 +23,7 @@ const ChatMessage = sequelize.define("ChatMessage", {
   },
 });
 
-ChatMessage.belongsTo(User, { foreignKey: "userId", as: "UserDatum" });
+ChatMessage.belongsTo(User, { foreignKey: "userId" , as: "User"});
 ChatMessage.belongsTo(Group, { foreignKey: "groupId", as: "Group" }); // ✅ Associate with Group
 
 module.exports = ChatMessage;
