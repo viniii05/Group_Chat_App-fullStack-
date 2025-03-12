@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
-const User = require("./UserData");
-const Group = require("./Group");
+const sequelize = require("../config/database");  // ✅ Make sure path is correct
+const User = require("./User");  // ✅ Load User before using it
+const Group = require("./Group");  // ✅ Load Group before using it
 
 const GroupMember = sequelize.define("GroupMember", {
     id: {
@@ -13,7 +13,7 @@ const GroupMember = sequelize.define("GroupMember", {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: User,
+            model: "users",  // ✅ Use actual table name (case-sensitive)
             key: "id",
         },
         onDelete: "CASCADE",
@@ -22,15 +22,19 @@ const GroupMember = sequelize.define("GroupMember", {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: Group,
+            model: "groups",  // ✅ Use actual table name (case-sensitive)
             key: "id",
         },
         onDelete: "CASCADE",
     },
+    isAdmin: {   
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
 });
-GroupMember.associate = (models) => {
-    GroupMember.belongsTo(models.Group, { foreignKey: "groupId", onDelete: "CASCADE" });
-    GroupMember.belongsTo(models.User, { foreignKey: "userId", onDelete: "CASCADE" });
-};
+
+// ✅ Define associations after defining model
+GroupMember.belongsTo(User, { foreignKey: "userId"}); 
+GroupMember.belongsTo(Group, { foreignKey: "groupId", as: "Group" });
 
 module.exports = GroupMember;

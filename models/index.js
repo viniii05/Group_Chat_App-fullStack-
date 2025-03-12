@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-const User = require("./UserData");
+const User = require("./User");
 const Group = require("./Group");
 const GroupMember = require("./GroupMember");
 const ChatMessage = require("./ChatMessage");

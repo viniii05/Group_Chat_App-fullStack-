@@ -1,3 +1,7 @@
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/database");  // ✅ Make sure path is correct
+const User = require("./User");
+
 module.exports = (sequelize, DataTypes) => {
     const Message = sequelize.define("Message", {
         text: {
@@ -11,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Message.associate = (models) => {
-        Message.belongsTo(models.UserDatum, { foreignKey: "userId" });
+        Message.belongsTo(models.User, { foreignKey: "userId" });
     };
 
     return Message;

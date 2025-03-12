@@ -57,7 +57,7 @@ exports.getMessages = async (req, res) => {
     // ✅ Fetch messages for the group
     const messages = await ChatMessage.findAll({
       where: { groupId },
-      include: [{ model: User, as: "UserDatum", attributes: ["name"] }],
+      include: [{ model: User, attributes: ["name"] }],
       order: [["createdAt", "ASC"]],
     });
 

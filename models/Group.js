@@ -12,12 +12,13 @@ const Group = sequelize.define("Group", {
         allowNull: false,
         unique: true,
     },
+    createdBy: {  // Track who created the group
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
 });
 
-Group.associate = (models) => {
-    Group.hasMany(models.GroupMember, { foreignKey: "groupId", onDelete: "CASCADE" });
-    Group.belongsToMany(models.User, { through: models.GroupMember, foreignKey: "groupId" });
-};
-
+// ✅ Define associations inside each model
+// Group.hasMany(require("./GroupMember"), { foreignKey: "groupId", onDelete: "CASCADE" });
 
 module.exports = Group;

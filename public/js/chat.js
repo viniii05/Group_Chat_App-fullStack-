@@ -6,10 +6,31 @@ if (!token) {
     window.location.href = "/login.html";
 }
 
-// Fetch and store user details
+// ====== UTILITY FUNCTIONS ======
+// Get the active group ID
+function getCurrentGroupId() {
+    const activeGroup = document.querySelector(".group.active");
+    return activeGroup ? activeGroup.getAttribute("data-group-id") : null;
+}
+
+// Display messages in chat
+function displayMessage(message, senderName) {
+    const messagesContainer = document.getElementById("messagesContainer");
+    if (!messagesContainer) {
+        console.error("Error: messagesContainer not found in DOM!");
+        return;
+    }
+
+    const messageElement = document.createElement("div");
+    messageElement.innerHTML = `<strong>${senderName}:</strong> ${message}`;
+    messagesContainer.appendChild(messageElement);
+}
+
+// ====== API CALLS ======
+// Fetch user details and store them
 async function fetchUserDetails() {
     try {
-        const response = await fetch("http://localhost:3000/user", {
+        const response = await fetch("/user", {
             headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -25,10 +46,10 @@ async function fetchUserDetails() {
     }
 }
 
-// Fetch groups and display them
+// Fetch and display groups
 async function fetchGroups() {
     try {
-        const response = await fetch("http://localhost:3000/groups", {
+        const response = await fetch("/groups", {
             headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -44,14 +65,13 @@ async function fetchGroups() {
             li.setAttribute("data-group-id", group.id);
             li.classList.add("group");
 
-            // Set the first group as active by default
             if (index === 0) {
                 li.classList.add("active");
                 joinGroup(group.id, group.name);
             }
 
             li.addEventListener("click", () => {
-                document.querySelectorAll(".group").forEach((g) => g.classList.remove("active"));
+                document.querySelectorAll(".group").forEach(g => g.classList.remove("active"));
                 li.classList.add("active");
                 joinGroup(group.id, group.name);
             });
@@ -62,47 +82,12 @@ async function fetchGroups() {
         console.error("Error fetching groups:", error);
     }
 }
-function getCurrentGroupId() {
-    const activeGroup = document.querySelector(".group.active"); // ✅ Get the active group
-    return activeGroup ? activeGroup.getAttribute("data-group-id") : null; // ✅ Return group ID or null
-}
 
-
-
-// Join a group chat
-function joinGroup(groupId, groupName) {
-    // Remove 'active' class from all groups
-    document.querySelectorAll("#group-list li").forEach(li => li.classList.remove("active"));
-
-    // Set clicked group as active
-    const selectedGroup = document.querySelector(`[data-group-id="${groupId}"]`);
-    if (selectedGroup) selectedGroup.classList.add("active");
-
-    localStorage.setItem("currentGroupId", groupId);
-    document.getElementById("groupTitle").innerText = groupName;
-
-    // ✅ Enable message input and send button
-    messageInput.removeAttribute("disabled");
-    sendBtn.removeAttribute("disabled");
-
-    // ✅ Enable the Invite button when a group is selected
-    const inviteBtn = document.getElementById("inviteBtn");
-    if (inviteBtn) inviteBtn.removeAttribute("disabled"); 
-
-    socket.emit("joinGroup", groupId);
-    fetchGroupMessages(groupId);
-}
-
-
-const messagesContainer = document.getElementById("messagesContainer"); 
-
-
-// Fetch previous messages of a group
+// Fetch and display group messages
 async function fetchGroupMessages(groupId) {
     try {
-        const response = await fetch(`http://localhost:3000/chat/group/${groupId}`, {
-            method: "GET",
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        const response = await fetch(`/chat/group/${groupId}`, {
+            headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!response.ok) throw new Error("Failed to fetch messages");
@@ -112,7 +97,7 @@ async function fetchGroupMessages(groupId) {
 
         if (!messagesContainer) {
             console.error("Error: messagesContainer element not found in DOM!");
-            return;  // Prevent setting innerHTML on null
+            return;
         }
 
         messagesContainer.innerHTML = ""; // Clear old messages
@@ -126,262 +111,285 @@ async function fetchGroupMessages(groupId) {
     }
 }
 
+// Fetch and display group members
+// async function fetchGroupMembers(groupId) {
+//     if (!groupId) {
+//         console.warn("No active group ID found.");
+//         return;
+//     }
 
-// Display messages in chat
-function displayMessage(message, senderName) {
-    const messagesContainer = document.getElementById("messagesContainer");  // ✅ Ensure it's defined
-    if (!messagesContainer) {
-        console.error("messagesContainer not found in DOM!");
-        return;
-    }
+//     try {
+//         const response = await fetch(`/groups/${groupId}/members`, {
+//             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+//         });
 
-    const messageElement = document.createElement("div");
-    messageElement.innerHTML = `<strong>${senderName}:</strong> ${message}`;
-    messagesContainer.appendChild(messageElement);
-}
+//         if (!response.ok) throw new Error("Failed to fetch group members");
 
+//         const data = await response.json(); 
+//         const members = data.members; // ✅ Correctly access the array
 
-// Send a message to the group
-async function sendMessage() {
-    const messageInput = document.getElementById("messageInput").value;
-    const groupId = getCurrentGroupId();
-    const token = localStorage.getItem("token");
+//         console.log("Fetched members:", members); // ✅ Debugging: Ensure we have the right array
 
-    console.log("JWT Token:", token); // ✅ Debug: Check if token exists
+//         if (!Array.isArray(members)) {
+//             console.error("Error: members is not an array!", members);
+//             return;
+//         }
 
-    if (!messageInput) {
-        console.error("Message is missing");
-        return;
-    }
+//         const membersList = document.getElementById("membersList");
+//         if (!membersList) {
+//             console.error("Error: membersList element not found in DOM!");
+//             return;
+//         }
+
+//         membersList.innerHTML = ""; // Clear previous list
+
+//         members.forEach(memberData => {
+//             const { id, isAdmin, User } = memberData;
+//             if (!User) return; // Ensure User object exists
+
+//             const li = document.createElement("li");
+//             li.innerHTML = `<strong>${User.name}</strong> ${isAdmin ? "(Admin)" : ""}`;
+
+//             // If user is not an admin, add "Make Admin" button
+//             if (!isAdmin) {
+//                 const promoteBtn = document.createElement("button");
+//                 promoteBtn.innerText = "Make Admin";
+//                 promoteBtn.onclick = () => promoteToAdmin(id);
+//                 li.appendChild(promoteBtn);
+//             }
+
+//             membersList.appendChild(li);
+//         });
+
+//     } catch (error) {
+//         console.error("Error fetching group members:", error);
+//     }
+// }
+
+async function fetchGroupMembers(groupId) {
     if (!groupId) {
-        console.log("Group ID missing");
-        return;
-    }
-    if (!token) {
-        console.log("Authentication token is missing!");
+        console.warn("No active group ID found.");
         return;
     }
 
     try {
-        const response = await fetch("http://localhost:3000/chat", {
+        const response = await fetch(`/groups/${groupId}/members`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch group members");
+
+        const data = await response.json();
+        const members = data.members; // ✅ Ensure correct structure
+
+        console.log("Fetched members:", members);
+
+        if (!Array.isArray(members)) {
+            console.error("Error: members is not an array!", members);
+            return;
+        }
+
+        const membersList = document.getElementById("group-members");
+        if (!membersList) {
+            console.error("Error: group-members element not found in DOM!");
+            return;
+        }
+
+        membersList.innerHTML = ""; // Clear previous list
+
+        let currentUserIsAdmin = false;
+        const currentUserId = parseInt(localStorage.getItem("userId")); // Get logged-in user's ID
+
+        members.forEach(memberData => {
+            const { id, isAdmin, User } = memberData;
+            if (!User) return; // Ensure User object exists
+
+            const li = document.createElement("li");
+            li.innerHTML = `<strong>${User.name}</strong> ${isAdmin ? "(Admin)" : ""}`;
+
+            // ✅ If the logged-in user is an admin, allow them to invite others
+            if (isAdmin && User.id === currentUserId) {
+                currentUserIsAdmin = true;
+            }
+
+            // ✅ If the user is not an admin, show "Make Admin" button
+            if (!isAdmin) {
+                const promoteBtn = document.createElement("button");
+                promoteBtn.innerText = "Make Admin";
+                promoteBtn.onclick = () => promoteToAdmin(id, li, promoteBtn); // Pass elements to update UI
+                li.appendChild(promoteBtn);
+            } else if (User.id !== currentUserId) {
+                // ✅ If the user is already an admin, add a "Remove Admin" button
+                const removeAdminBtn = document.createElement("button");
+                removeAdminBtn.innerText = "Remove Admin";
+                removeAdminBtn.onclick = () => removeAdmin(id, li, removeAdminBtn);
+                li.appendChild(removeAdminBtn);
+            }
+
+            membersList.appendChild(li);
+        });
+
+        // ✅ Enable the Invite button ONLY if the logged-in user is an admin
+        const inviteBtn = document.getElementById("inviteBtn");
+        if (inviteBtn) {
+            if (currentUserIsAdmin) {
+                inviteBtn.removeAttribute("disabled"); // Enable button for admins
+            } else {
+                inviteBtn.setAttribute("disabled", "true"); // Disable for non-admins
+            }
+        }
+
+    } catch (error) {
+        console.error("Error fetching group members:", error);
+    }
+}
+
+
+
+// Promote user to admin
+async function promoteToAdmin(userId, listItem, promoteBtn) {
+    const groupId = getCurrentGroupId();
+    if (!groupId) return;
+
+    try {
+        const response = await fetch("/groups/make-admin", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}` // ✅ Ensure token is included
+                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ message: messageInput, groupId }),
+            body: JSON.stringify({ groupId, userId }),
         });
 
-        if (!response.ok) {
-            throw new Error(`Failed to send message. Status: ${response.status}`);
-        }
+        const result = await response.json();
+        if (response.ok) {
+            alert("User promoted to admin!");
 
-        document.getElementById("messageInput").value = ""; // Clear input after sending
+            // ✅ Update UI instantly
+            promoteBtn.remove(); // Remove "Make Admin" button
+            listItem.innerHTML += " (Admin)"; // Show "Admin" next to name
+
+            // ✅ Add "Remove Admin" button
+            const removeAdminBtn = document.createElement("button");
+            removeAdminBtn.innerText = "Remove Admin";
+            removeAdminBtn.onclick = () => removeAdmin(userId, listItem, removeAdminBtn);
+            listItem.appendChild(removeAdminBtn);
+
+        } else {
+            alert(result.message || "Failed to promote user.");
+        }
+    } catch (error) {
+        console.error("Error promoting user:", error);
+        alert("Server error. Please try again.");
+    }
+}
+
+async function removeAdmin(userId, listItem, removeAdminBtn) {
+    const groupId = getCurrentGroupId();
+    if (!groupId) return;
+
+    try {
+        const response = await fetch("/groups/remove-admin", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ groupId, userId }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert("Admin rights removed!");
+
+            // ✅ Update UI instantly
+            removeAdminBtn.remove(); // Remove "Remove Admin" button
+            listItem.innerHTML = `<strong>${listItem.innerText.replace(" (Admin)", "")}</strong>`; // Remove "Admin" text
+
+            // ✅ Add back "Make Admin" button
+            const promoteBtn = document.createElement("button");
+            promoteBtn.innerText = "Make Admin";
+            promoteBtn.onclick = () => promoteToAdmin(userId, listItem, promoteBtn);
+            listItem.appendChild(promoteBtn);
+
+        } else {
+            alert(result.message || "Failed to remove admin rights.");
+        }
+    } catch (error) {
+        console.error("Error removing admin:", error);
+        alert("Server error. Please try again.");
+    }
+}
+
+// Send message to group
+async function sendMessage() {
+    const messageInput = document.getElementById("messageInput");
+    const message = messageInput.value.trim();
+    const groupId = getCurrentGroupId();
+
+    if (!message || !groupId) return;
+
+    try {
+        const response = await fetch("/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ message, groupId }),
+        });
+
+        if (!response.ok) throw new Error("Failed to send message");
+
+        messageInput.value = ""; // Clear input after sending
     } catch (error) {
         console.error("Error sending message:", error);
     }
 }
 
-  
-//   function getCurrentGroupId() {
-//     const activeGroup = document.querySelector(".group.active"); // Adjust selector as per your UI
-//     return activeGroup ? activeGroup.dataset.groupId : null;
-//   }
-  
+// Join a group chat
+function joinGroup(groupId, groupName) {
+    document.querySelectorAll(".group").forEach(li => li.classList.remove("active"));
 
+    const selectedGroup = document.querySelector(`[data-group-id="${groupId}"]`);
+    if (selectedGroup) selectedGroup.classList.add("active");
 
-// Update online user list
+    localStorage.setItem("currentGroupId", groupId);
+    document.getElementById("groupTitle").innerText = groupName;
+
+    document.getElementById("messageInput").removeAttribute("disabled");
+    document.getElementById("sendBtn").removeAttribute("disabled");
+
+    socket.emit("joinGroup", groupId);
+    fetchGroupMessages(groupId);
+    fetchGroupMembers(groupId);
+}
+
+// ====== SOCKET LISTENERS ======
 socket.on("userList", (users) => {
+    const usersList = document.getElementById("usersList");
     usersList.innerHTML = "";
-    users.forEach((user) => {
-        const userElement = document.createElement("li");
-        userElement.innerText = user;
-        usersList.appendChild(userElement);
+    users.forEach(user => {
+        const li = document.createElement("li");
+        li.innerText = user;
+        usersList.appendChild(li);
     });
 });
 
-// Receive new group messages
 socket.on("groupMessage", (data) => {
     displayMessage(data.user, data.text);
 });
 
-// Event listeners
-sendBtn.addEventListener("click", sendMessage);
-messageInput.addEventListener("keypress", (event) => {
-    if (event.key === "Enter") {
-        sendMessage();
-    }
-});
-
+// ====== EVENT LISTENERS ======
 document.addEventListener("DOMContentLoaded", () => {
-    const inviteBtn = document.getElementById("inviteBtn");
-    const inviteModal = document.getElementById("inviteModal");
-    const closeModal = document.querySelector(".close");
-    const sendInviteBtn = document.getElementById("sendInviteBtn");
-    const inviteUserIdInput = document.getElementById("inviteUserId");
-
-    // Open modal when clicking Invite
-    inviteBtn.addEventListener("click", () => {
-        inviteModal.style.display = "block";
+    document.getElementById("sendBtn").addEventListener("click", sendMessage);
+    document.getElementById("messageInput").addEventListener("keypress", (event) => {
+        if (event.key === "Enter") sendMessage();
     });
 
-    // Close modal when clicking 'X'
-    closeModal.addEventListener("click", () => {
-        inviteModal.style.display = "none";
-    });
+    const groupId = getCurrentGroupId();
+    if (groupId) fetchGroupMembers(groupId); // ✅ Fetch members when page loads
 
-    // Close modal when clicking outside of it
-    window.addEventListener("click", (e) => {
-        if (e.target === inviteModal) {
-            inviteModal.style.display = "none";
-        }
-    });
-
-    // Send Invite
-    sendInviteBtn.addEventListener("click", async () => {
-        const invitedUserId = inviteUserIdInput.value.trim();
-        const groupId = getCurrentGroupId(); // Get active group ID
-
-        if (!invitedUserId || !groupId) {
-            alert("Please enter a valid user ID.");
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem("token");
-            const response = await fetch("/groups/invite", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ groupId, invitedUserId }),
-            });
-
-            const result = await response.json();
-            if (response.ok) {
-                alert("User invited successfully!");
-                inviteModal.style.display = "none";
-                inviteUserIdInput.value = ""; // Clear input field
-            } else {
-                alert(result.message || "Failed to invite user.");
-            }
-        } catch (error) {
-            console.error("Error inviting user:", error);
-            alert("Server error. Please try again.");
-        }
-    });
+    fetchUserDetails();
+    fetchGroups();
 });
-
-document.addEventListener("DOMContentLoaded", () => {
-    const createGroupBtn = document.getElementById("createGroupBtn");
-    const createGroupModal = document.getElementById("createGroupModal");
-    const createClose = document.querySelector(".create-close");
-    const createGroupConfirmBtn = document.getElementById("createGroupConfirmBtn");
-    const groupNameInput = document.getElementById("groupNameInput");
-
-    // Open modal when clicking "Create Group"
-    createGroupBtn.addEventListener("click", () => {
-        createGroupModal.style.display = "block";
-    });
-
-    // Close modal when clicking 'X'
-    createClose.addEventListener("click", () => {
-        createGroupModal.style.display = "none";
-    });
-
-    // Close modal when clicking outside of it
-    window.addEventListener("click", (e) => {
-        if (e.target === createGroupModal) {
-            createGroupModal.style.display = "none";
-        }
-    });
-
-    // Create Group
-    createGroupConfirmBtn.addEventListener("click", async () => {
-        const groupName = groupNameInput.value.trim();
-
-        if (!groupName) {
-            alert("Please enter a group name.");
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem("token");
-            console.log("Group Name:", groupName);
-            if (!groupName || groupName.length < 3) { 
-                alert("Group name is required and must be at least 3 characters long.");
-                return;
-            }
-            
-            const response = await fetch("http://localhost:3000/groups", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-    body: JSON.stringify({ name: groupName }), // Ensure correct key name
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                alert("Group created successfully!");
-                createGroupModal.style.display = "none";
-                groupNameInput.value = ""; // Clear input field
-                fetchGroups(); // Refresh the group list
-            } else {
-                alert(result.message || "Failed to create group.");
-            }
-        } catch (error) {
-            console.error("Error creating group:", error);
-            alert("Server error. Please try again.");
-        }
-    });
-});
-document.addEventListener("DOMContentLoaded", () => {
-    const inviteBtn = document.getElementById("inviteBtn");
-    if (inviteBtn) inviteBtn.setAttribute("disabled", "true"); // ✅ Disabled by default
-    fetchUserDetails().then(() => fetchGroups());
-});
-document.addEventListener("DOMContentLoaded", () => {
-    const inviteBtn = document.getElementById("inviteBtn");
-    const inviteModal = document.getElementById("inviteModal");
-    const closeModal = document.querySelector(".close");
-    
-    if (inviteBtn) {
-        inviteBtn.addEventListener("click", () => {
-            inviteModal.style.display = "block"; // ✅ Show modal
-        });
-    }
-
-    if (closeModal) {
-        closeModal.addEventListener("click", () => {
-            inviteModal.style.display = "none"; // ✅ Hide modal on close
-        });
-    }
-
-    window.addEventListener("click", (e) => {
-        if (e.target === inviteModal) {
-            inviteModal.style.display = "none"; // ✅ Hide modal when clicking outside
-        }
-    });
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-    const inviteBtn = document.getElementById("inviteBtn");
-
-    if (!inviteBtn) {
-        console.error("Invite button not found in DOM!");
-        return;  // Prevent further execution if the button doesn't exist
-    }
-
-    inviteBtn.setAttribute("disabled", "true"); // ✅ Disable by default
-
-    fetchUserDetails().then(() => fetchGroups());
-});
-
-
-
-// Load groups and user details on page load
-fetchUserDetails().then(() => fetchGroups());
