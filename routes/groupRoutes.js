@@ -6,9 +6,9 @@ const router = express.Router();
 
 router.get("/", authMiddleware.authenticateUser, groupController.getUserGroups);
 router.post("/", authMiddleware.authenticateUser, groupController.createGroup);
-router.post("/invite", authMiddleware.authenticateUser, groupController.inviteUser);
+router.post("/:groupId/invite", authMiddleware.authenticateUser, groupController.inviteUser);
 router.get("/user/:userId", authMiddleware.authenticateUser, groupController.getUserGroupsById);
-router.get('/:groupId/members', groupController.getGroupMembers)
+router.get('/:groupId/members',authMiddleware.authenticateUser, groupController.getGroupMembers)
 router.post("/change-admin", authMiddleware.authenticateUser, groupController.changeAdminStatus);
 router.post("/remove-user", authMiddleware.authenticateUser, groupController.removeUser);
 

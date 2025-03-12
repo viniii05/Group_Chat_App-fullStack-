@@ -34,7 +34,7 @@ const GroupMember = sequelize.define("GroupMember", {
 });
 
 // ✅ Define associations after defining model
-GroupMember.belongsTo(User, { foreignKey: "userId"}); 
-GroupMember.belongsTo(Group, { foreignKey: "groupId", as: "Group" });
+GroupMember.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
+GroupMember.belongsTo(Group, { foreignKey: "groupId", onDelete: "CASCADE" });
 
 module.exports = GroupMember;

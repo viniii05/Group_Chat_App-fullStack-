@@ -23,6 +23,8 @@ exports.getUserGroups = async (req, res) => {
 };
 
 exports.createGroup = async (req, res) => {
+    console.log("Received request to create group:", req.body); // ✅ Debugging
+
     console.log("Received body:", req.body);
     try {
         const { name } = req.body;
@@ -150,19 +152,45 @@ exports.makeAdmin = async (req, res) => {
     }
 };
 
-exports.getGroupMembers = async (req, res) => {
-    try {
-        const { groupId } = req.params;
+// exports.getGroupMembers = async (req, res) => {
+//     try {
+//         const { groupId } = req.params;
+//         const userId = req.user.id; // Assuming authentication middleware adds `req.user.id`
 
-        const groupMembers = await GroupMember.findAll({
+//         const groupMembers = await GroupMember.findAll({
+//             where: { groupId },
+//             include: [{ model: User, attributes: ['id', 'name', 'email'] }]
+//         });
+//         const currentUserIsAdmin = members.some(member => member.userId === userId && member.isAdmin);
+
+//         res.json({ members: groupMembers , currentUserIsAdmin });
+//     } catch (error) {
+//         console.error("Error fetching group members:", error);
+//         res.status(500).json({ error: "Failed to fetch group members" });
+//     }
+// };
+ exports.getGroupMembers = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized: User not found" });
+        }
+
+        const { groupId } = req.params;
+        const userId = req.user.id; // ✅ Ensure `req.user` is defined before accessing `id`
+
+        // ✅ Fetch group members with admin status
+        const members = await GroupMember.findAll({
             where: { groupId },
-            include: [{ model: User, attributes: ['id', 'name', 'email'] }]
+            include: [{ model: User, attributes: ["id", "name", "email"] }],
         });
 
-        res.json({ members: groupMembers });
+        // ✅ Check if the logged-in user is an admin
+        const currentUserIsAdmin = members.some(member => member.userId === userId && member.isAdmin);
+
+        res.json({ members, currentUserIsAdmin }); // ✅ Now includes `currentUserIsAdmin`
     } catch (error) {
         console.error("Error fetching group members:", error);
-        res.status(500).json({ error: "Failed to fetch group members" });
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 

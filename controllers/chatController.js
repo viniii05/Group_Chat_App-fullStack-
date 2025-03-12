@@ -30,12 +30,13 @@ exports.saveMessage = async (req, res) => {
     // ✅ Emit message to the specific group
     const io = req.app.get("io"); // Get io instance
     if (io) {
-      io.to(`group_${groupId}`).emit("message", {
+      io.to(`group_${groupId}`).emit("receiveMessage", {
         user: user.name,
         text: message,
         groupId,
       });
     }
+
 
     // ✅ Respond to the client
     res.status(201).json(newMessage);
