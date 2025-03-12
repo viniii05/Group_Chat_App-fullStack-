@@ -151,6 +151,88 @@ async function fetchGroupMessages(groupId) {
     }
 }
 
+// async function fetchGroupMembers(groupId) {
+//     if (!groupId) {
+//         console.warn("No active group ID found.");
+//         return;
+//     }
+
+//     try {
+//         const response = await fetch(`/groups/${groupId}/members`, {
+//             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+//         });
+
+//         if (!response.ok) throw new Error("Failed to fetch group members");
+
+//         const data = await response.json();
+//         const members = data.members;
+
+//         console.log("Fetched members:", members);
+
+//         if (!Array.isArray(members)) {
+//             console.error("Error: members is not an array!", members);
+//             return;
+//         }
+
+//         const membersList = document.getElementById("group-members");
+//         if (!membersList) {
+//             console.error("Error: group-members element not found in DOM!");
+//             return;
+//         }
+
+//         membersList.innerHTML = ""; // Clear previous list
+
+//         const currentUserId = parseInt(localStorage.getItem("userId")); // Get logged-in user's ID
+//         let currentUserIsAdmin = false;
+
+//         members.forEach(memberData => {
+//             const { id, isAdmin, User } = memberData;
+//             if (!User) return; // Ensure User object exists
+
+//             const li = document.createElement("li");
+//             li.innerHTML = `<strong>${User.name}</strong> ${isAdmin ? "(Admin)" : ""}`;
+
+//             // ✅ Correctly check if the logged-in user is an admin
+//             if (User.id === currentUserId && isAdmin) {
+//                 currentUserIsAdmin = true;
+//             }
+//             console.log("Backend says currentUserIsAdmin:", data.currentUserIsAdmin);
+
+//             if (!isAdmin) {
+//                 const promoteBtn = document.createElement("button");
+//                 promoteBtn.innerText = "Make Admin";
+//                 promoteBtn.onclick = () => promoteToAdmin(id, li, promoteBtn);
+//                 li.appendChild(promoteBtn);
+//             } else if (User.id !== currentUserId) {
+//                 const removeAdminBtn = document.createElement("button");
+//                 removeAdminBtn.innerText = "Remove Admin";
+//                 removeAdminBtn.onclick = () => removeAdmin(id, li, removeAdminBtn);
+//                 li.appendChild(removeAdminBtn);
+//             }
+
+//             membersList.appendChild(li);
+//         });
+
+//         // ✅ Manually check if the logged-in user is an admin from backend response
+//         if (!currentUserIsAdmin && data.currentUserIsAdmin !== undefined) {
+//             currentUserIsAdmin = data.currentUserIsAdmin; // Use backend response
+//         }
+
+//         // ✅ Enable the Invite button ONLY if the logged-in user is an admin
+//         const inviteBtn = document.getElementById("inviteBtn");
+//         if (inviteBtn) {
+//             if (currentUserIsAdmin) {
+//                 inviteBtn.removeAttribute("disabled"); // Enable button for admins
+//             } else {
+//                 inviteBtn.setAttribute("disabled", "true"); // Disable for non-admins
+//             }
+//         }
+
+//     } catch (error) {
+//         console.error("Error fetching group members:", error);
+//     }
+// }
+
 async function fetchGroupMembers(groupId) {
     if (!groupId) {
         console.warn("No active group ID found.");
@@ -190,22 +272,26 @@ async function fetchGroupMembers(groupId) {
             if (!User) return; // Ensure User object exists
 
             const li = document.createElement("li");
-            li.innerHTML = `<strong>${User.name}</strong> ${isAdmin ? "(Admin)" : ""}`;
+            li.innerHTML = `<strong>${User.name}</strong> ${isAdmin ? "<span class='admin-badge'>Admin</span>" : ""}`;
 
             // ✅ Correctly check if the logged-in user is an admin
             if (User.id === currentUserId && isAdmin) {
                 currentUserIsAdmin = true;
             }
+
             console.log("Backend says currentUserIsAdmin:", data.currentUserIsAdmin);
 
+            // ✅ Admin Promotion & Removal Buttons
             if (!isAdmin) {
                 const promoteBtn = document.createElement("button");
                 promoteBtn.innerText = "Make Admin";
+                promoteBtn.classList.add("promote-btn");
                 promoteBtn.onclick = () => promoteToAdmin(id, li, promoteBtn);
                 li.appendChild(promoteBtn);
             } else if (User.id !== currentUserId) {
                 const removeAdminBtn = document.createElement("button");
                 removeAdminBtn.innerText = "Remove Admin";
+                removeAdminBtn.classList.add("remove-btn");
                 removeAdminBtn.onclick = () => removeAdmin(id, li, removeAdminBtn);
                 li.appendChild(removeAdminBtn);
             }
@@ -232,6 +318,7 @@ async function fetchGroupMembers(groupId) {
         console.error("Error fetching group members:", error);
     }
 }
+
 
 async function inviteUserToGroup() {
     const groupId = localStorage.getItem("activeGroupId");
