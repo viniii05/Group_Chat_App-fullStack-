@@ -1,4 +1,5 @@
 const { User, Group, GroupMember, ChatMessage } = require("../models");
+const upload = require('../middlewares/fileUpload');
 
 exports.saveMessage = async (req, res) => {
   console.log("Request User:", req.user); // ✅ Debugging
@@ -70,5 +71,24 @@ exports.getMessages = async (req, res) => {
   } catch (error) {
     console.error("Error fetching messages:", error);
     res.status(500).json({ error: "Failed to fetch messages" });
+  }
+};
+
+exports.uploadFile =  async (req, res) => {
+  try {
+      const fileUrl = req.file.location; // S3 file URL
+      const { userId, groupId } = req.body;
+
+      // Save the file message in the database
+      await ChatMessage.create({
+          message: fileUrl, // Storing file URL as message
+          userId,
+          groupId
+      });
+
+      res.status(200).json({ message: 'File uploaded successfully', fileUrl });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'File upload failed' });
   }
 };

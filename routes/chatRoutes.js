@@ -1,13 +1,14 @@
 const express = require("express");
 const chatController = require("../controllers/chatController");
 const authenticateUser = require("../middlewares/authenticateUser");
-const { ChatMessage, User } = require("../models");  // ✅ Correct import
+const { ChatMessage, User } = require("../models");
+const upload = require('../middlewares/fileUpload');
 
 const router = express.Router();
 
 router.post("/chat", authenticateUser.authenticateUser, chatController.saveMessage);
 router.get("/chat", authenticateUser.authenticateUser, chatController.getMessages);
-
+router.post('/chat/upload',upload.single('file') , chatController.uploadFile);
 router.get("/chat/group/:groupId", authenticateUser.authenticateUser, async (req, res) => {
     const { groupId } = req.params;
     try {

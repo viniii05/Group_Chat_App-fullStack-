@@ -1,4 +1,4 @@
-const socket = io("http://localhost:3000");
+const socket = io("http://3.7.55.51:3000");
 const token = localStorage.getItem("token");
 
 if (!token) {
@@ -46,42 +46,6 @@ async function fetchUserDetails() {
     }
 }
 
-// Fetch and display groups
-// async function fetchGroups() {
-//     try {
-//         const response = await fetch("/groups", {
-//             headers: { Authorization: `Bearer ${token}` },
-//         });
-
-//         if (!response.ok) throw new Error("Failed to fetch groups");
-
-//         const groups = await response.json();
-//         const groupList = document.getElementById("group-list");
-//         groupList.innerHTML = "";
-
-//         groups.forEach((group, index) => {
-//             const li = document.createElement("li");
-//             li.innerText = group.name;
-//             li.setAttribute("data-group-id", group.id);
-//             li.classList.add("group");
-
-//             if (index === 0) {
-//                 li.classList.add("active");
-//                 joinGroup(group.id, group.name);
-//             }
-
-//             li.addEventListener("click", () => {
-//                 document.querySelectorAll(".group").forEach(g => g.classList.remove("active"));
-//                 li.classList.add("active");
-//                 joinGroup(group.id, group.name);
-//             });
-
-//             groupList.appendChild(li);
-//         });
-//     } catch (error) {
-//         console.error("Error fetching groups:", error);
-//     }
-// }
 async function fetchGroups() {
     try {
         const response = await fetch("/groups", {
@@ -103,7 +67,7 @@ async function fetchGroups() {
             // ✅ Set first group as active by default
             if (index === 0) {
                 li.classList.add("active");
-                localStorage.setItem("activeGroupId", group.id); // ✅ Store group ID
+                localStorage.setItem("activeGroupId", group.id); 
                 joinGroup(group.id, group.name);
             }
 
@@ -111,7 +75,7 @@ async function fetchGroups() {
                 document.querySelectorAll(".group").forEach(g => g.classList.remove("active"));
                 li.classList.add("active");
 
-                localStorage.setItem("activeGroupId", group.id); // ✅ Store group ID when clicked
+                localStorage.setItem("activeGroupId", group.id);
                 joinGroup(group.id, group.name);
             });
 
@@ -149,89 +113,7 @@ async function fetchGroupMessages(groupId) {
     } catch (error) {
         console.error("Error fetching group messages:", error);
     }
-}
-
-// async function fetchGroupMembers(groupId) {
-//     if (!groupId) {
-//         console.warn("No active group ID found.");
-//         return;
-//     }
-
-//     try {
-//         const response = await fetch(`/groups/${groupId}/members`, {
-//             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//         });
-
-//         if (!response.ok) throw new Error("Failed to fetch group members");
-
-//         const data = await response.json();
-//         const members = data.members;
-
-//         console.log("Fetched members:", members);
-
-//         if (!Array.isArray(members)) {
-//             console.error("Error: members is not an array!", members);
-//             return;
-//         }
-
-//         const membersList = document.getElementById("group-members");
-//         if (!membersList) {
-//             console.error("Error: group-members element not found in DOM!");
-//             return;
-//         }
-
-//         membersList.innerHTML = ""; // Clear previous list
-
-//         const currentUserId = parseInt(localStorage.getItem("userId")); // Get logged-in user's ID
-//         let currentUserIsAdmin = false;
-
-//         members.forEach(memberData => {
-//             const { id, isAdmin, User } = memberData;
-//             if (!User) return; // Ensure User object exists
-
-//             const li = document.createElement("li");
-//             li.innerHTML = `<strong>${User.name}</strong> ${isAdmin ? "(Admin)" : ""}`;
-
-//             // ✅ Correctly check if the logged-in user is an admin
-//             if (User.id === currentUserId && isAdmin) {
-//                 currentUserIsAdmin = true;
-//             }
-//             console.log("Backend says currentUserIsAdmin:", data.currentUserIsAdmin);
-
-//             if (!isAdmin) {
-//                 const promoteBtn = document.createElement("button");
-//                 promoteBtn.innerText = "Make Admin";
-//                 promoteBtn.onclick = () => promoteToAdmin(id, li, promoteBtn);
-//                 li.appendChild(promoteBtn);
-//             } else if (User.id !== currentUserId) {
-//                 const removeAdminBtn = document.createElement("button");
-//                 removeAdminBtn.innerText = "Remove Admin";
-//                 removeAdminBtn.onclick = () => removeAdmin(id, li, removeAdminBtn);
-//                 li.appendChild(removeAdminBtn);
-//             }
-
-//             membersList.appendChild(li);
-//         });
-
-//         // ✅ Manually check if the logged-in user is an admin from backend response
-//         if (!currentUserIsAdmin && data.currentUserIsAdmin !== undefined) {
-//             currentUserIsAdmin = data.currentUserIsAdmin; // Use backend response
-//         }
-
-//         // ✅ Enable the Invite button ONLY if the logged-in user is an admin
-//         const inviteBtn = document.getElementById("inviteBtn");
-//         if (inviteBtn) {
-//             if (currentUserIsAdmin) {
-//                 inviteBtn.removeAttribute("disabled"); // Enable button for admins
-//             } else {
-//                 inviteBtn.setAttribute("disabled", "true"); // Disable for non-admins
-//             }
-//         }
-
-//     } catch (error) {
-//         console.error("Error fetching group members:", error);
-//     }
-// }
+}      
 
 async function fetchGroupMembers(groupId) {
     if (!groupId) {
@@ -262,7 +144,7 @@ async function fetchGroupMembers(groupId) {
             return;
         }
 
-        membersList.innerHTML = ""; // Clear previous list
+        membersList.innerHTML = ""; 
 
         const currentUserId = parseInt(localStorage.getItem("userId")); // Get logged-in user's ID
         let currentUserIsAdmin = false;
@@ -274,7 +156,6 @@ async function fetchGroupMembers(groupId) {
             const li = document.createElement("li");
             li.innerHTML = `<strong>${User.name}</strong> ${isAdmin ? "<span class='admin-badge'>Admin</span>" : ""}`;
 
-            // ✅ Correctly check if the logged-in user is an admin
             if (User.id === currentUserId && isAdmin) {
                 currentUserIsAdmin = true;
             }
@@ -299,12 +180,10 @@ async function fetchGroupMembers(groupId) {
             membersList.appendChild(li);
         });
 
-        // ✅ Manually check if the logged-in user is an admin from backend response
         if (!currentUserIsAdmin && data.currentUserIsAdmin !== undefined) {
             currentUserIsAdmin = data.currentUserIsAdmin; // Use backend response
         }
 
-        // ✅ Enable the Invite button ONLY if the logged-in user is an admin
         const inviteBtn = document.getElementById("inviteBtn");
         if (inviteBtn) {
             if (currentUserIsAdmin) {
@@ -322,7 +201,7 @@ async function fetchGroupMembers(groupId) {
 
 async function inviteUserToGroup() {
     const groupId = localStorage.getItem("activeGroupId");
-    console.log("Stored activeGroupId:", groupId); // ✅ Debugging
+    console.log("Stored activeGroupId:", groupId); 
 
     if (!groupId || groupId === "null") {
         alert("Please select a group first before inviting users.");
@@ -336,7 +215,7 @@ async function inviteUserToGroup() {
     }
 
     try {
-        console.log("Inviting user to group:", groupId, email); // ✅ Debugging
+        console.log("Inviting user to group:", groupId, email);
 
         const response = await fetch(`/groups/${groupId}/invite`, {
             method: "POST",
@@ -344,63 +223,22 @@ async function inviteUserToGroup() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-            body: JSON.stringify({ groupId, searchQuery: email }), // ✅ Fix: Ensure correct key
+            body: JSON.stringify({ groupId, searchQuery: email }), 
         });
 
         const data = await response.json();
-        console.log("Invite API Response:", data); // ✅ Debugging
+        console.log("Invite API Response:", data); 
 
         if (!response.ok) throw new Error(data.message || "Failed to invite user");
 
         alert("User invited successfully!");
-        fetchGroupMembers(groupId); // ✅ Refresh group members list
+        fetchGroupMembers(groupId); 
     } catch (error) {
         console.error("Error inviting user:", error);
         alert(`Error: ${error.message}`);
     }
 }
 
-// async function inviteUserToGroup() {
-//     const groupId = localStorage.getItem("activeGroupId");
-    
-//     if (!groupId || groupId === "null") { // ✅ Prevent calling API with null
-//         alert("Please select a group first before inviting users.");
-//         return;
-//     }
-
-//     const email = prompt("Enter the email of the user to invite:");
-//     if (!email) {
-//         alert("User email is required!");
-//         return;
-//     }
-
-//     try {
-//         console.log("Inviting user to group:", groupId, email); // ✅ Debugging
-//         const response = await fetch(`/groups/${groupId}/invite`, {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 Authorization: `Bearer ${localStorage.getItem("token")}`,
-//             },
-//             body: JSON.stringify({ email }),
-//         });
-
-//         const data = await response.json();
-//         console.log("Invite API Response:", data); // ✅ Debugging
-
-//         if (!response.ok) throw new Error(data.message || "Failed to invite user");
-
-//         alert("User invited successfully!");
-//         fetchGroupMembers(groupId); // ✅ Refresh group members list
-//     } catch (error) {
-//         console.error("Error inviting user:", error);
-//         alert(`Error: ${error.message}`);
-//     }
-// }
-
-
-
-// Promote user to admin
 async function promoteToAdmin(userId, listItem, promoteBtn) {
     const groupId = getCurrentGroupId();
     if (!groupId) return;
@@ -456,11 +294,9 @@ async function removeAdmin(userId, listItem, removeAdminBtn) {
         if (response.ok) {
             alert("Admin rights removed!");
 
-            // ✅ Update UI instantly
             removeAdminBtn.remove(); // Remove "Remove Admin" button
             listItem.innerHTML = `<strong>${listItem.innerText.replace(" (Admin)", "")}</strong>`; // Remove "Admin" text
 
-            // ✅ Add back "Make Admin" button
             const promoteBtn = document.createElement("button");
             promoteBtn.innerText = "Make Admin";
             promoteBtn.onclick = () => promoteToAdmin(userId, listItem, promoteBtn);
@@ -553,6 +389,22 @@ socket.on("receiveMessage", (data) => {
 socket.on("groupMessage", (data) => {
     displayMessage(data.user, data.text);
 });
+function displayMessage(content, isFile = false) {
+    const messageContainer = document.getElementById('messages');
+    const messageElement = document.createElement('div');
+
+    if (isFile) {
+        if (content.endsWith('.jpg') || content.endsWith('.png') || content.endsWith('.gif')) {
+            messageElement.innerHTML = `<img src="${content}" alt="File" width="200">`;
+        } else {
+            messageElement.innerHTML = `<a href="${content}" target="_blank">Download File</a>`;
+        }
+    } else {
+        messageElement.textContent = content;
+    }
+
+    messageContainer.appendChild(messageElement);
+}
 
 // ====== EVENT LISTENERS ======
 document.addEventListener("DOMContentLoaded", () => {
@@ -567,6 +419,31 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchUserDetails();
     fetchGroups();
 });
+document.getElementById('fileInput').addEventListener('change', async function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', localStorage.getItem('userId'));
+    formData.append('groupId', activeGroupId); // Assuming you have an active group ID
+
+    try {
+        const response = await fetch('http://3.7.55.51:3000/chat/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            displayMessage(data.fileUrl, true); // Show the uploaded file in chat
+        } else {
+            console.error('File upload failed:', data.message);
+        }
+    } catch (error) {
+        console.error('Error uploading file:', error);
+    }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     const createGroupBtn = document.getElementById("createGroupBtn");
@@ -574,17 +451,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeModalBtn = document.querySelector(".create-close");
     const confirmGroupBtn = document.getElementById("createGroupConfirmBtn");
 
-    // ✅ Open modal when clicking "Create Group" button
     createGroupBtn.addEventListener("click", () => {
         createGroupModal.style.display = "block";
     });
 
-    // ✅ Close modal when clicking "X" button
     closeModalBtn.addEventListener("click", () => {
         createGroupModal.style.display = "none";
     });
 
-    // ✅ Create group when clicking confirm
     confirmGroupBtn.addEventListener("click", async () => {
         const groupName = document.getElementById("groupNameInput").value.trim();
         if (!groupName) {
@@ -623,7 +497,6 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Invite button clicked!");
         inviteUserToGroup();
     });
-    
 });
 
 
