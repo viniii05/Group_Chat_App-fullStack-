@@ -9,7 +9,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     const user = { name, email, phonenumber, password };
 
     try {
-        const response = await fetch('http://3.7.55.51:3000/signup', {
+        const response = await fetch('http://localhost:3000/signup', {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',

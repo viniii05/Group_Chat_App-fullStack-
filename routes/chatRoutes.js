@@ -25,4 +25,7 @@ router.get("/chat/group/:groupId", authenticateUser.authenticateUser, async (req
     }
 });
 
+router.get("/archived/:groupId", chatController.archiveChats);
+
+
 module.exports = router;

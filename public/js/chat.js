@@ -1,4 +1,4 @@
-const socket = io("http://3.7.55.51:3000");
+const socket = io("http://localhost:3000");
 const token = localStorage.getItem("token");
 
 if (!token) {
@@ -429,7 +429,7 @@ document.getElementById('fileInput').addEventListener('change', async function (
     formData.append('groupId', activeGroupId); // Assuming you have an active group ID
 
     try {
-        const response = await fetch('http://3.7.55.51:3000/chat/upload', {
+        const response = await fetch('http://localhost:3000/chat/upload', {
             method: 'POST',
             body: formData
         });

@@ -1,5 +1,4 @@
 const { User, Group, GroupMember, ChatMessage } = require("../models");
-const upload = require('../middlewares/fileUpload');
 
 exports.saveMessage = async (req, res) => {
   console.log("Request User:", req.user); // ✅ Debugging
@@ -90,5 +89,20 @@ exports.uploadFile =  async (req, res) => {
   } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'File upload failed' });
+  }
+};
+
+exports.archiveChats = async (req, res) => {
+  try {
+      const { groupId } = req.params;
+      const messages = await ArchivedChat.findAll({
+          where: { groupId },
+          order: [["createdAt", "DESC"]],
+      });
+
+      res.json(messages);
+  } catch (error) {
+      console.error("Error fetching archived messages:", error);
+      res.status(500).json({ error: "Server error" });
   }
 };
